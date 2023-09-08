@@ -11,25 +11,7 @@ const PermissionsModel = require("../services/permissions/permissions.model");
 
 const constants = require("../utils/constants");
 
-/**
- * Description of the users controller.
- * @module users.controller
- * @type {{users:Function}}
- * @type {{createContact:Function}}
- * @type {{deleteContact:Function}}
- * @type {{getUserContacts:Function}}
- * @type {{updateContactbyId:Function}}
- */
-
 module.exports = {
-  /**
-   * Description of the users controller. This function lets you retreive all the users.
-   * @function users
-   * @param {req} req - The coming request
-   * @param {res} res - The response object to be sent
-   * @return {sendErrorResponse|sendSuccessResponse}
-   */
-
   async users(req, res) {
     try {
       let db = await DBInitializer();
@@ -50,14 +32,6 @@ module.exports = {
       );
     }
   },
-
-  /**
-   * Description of the createUsers controller. This function lets you create a new user.
-   * @function createUser
-   * @param {req} req - The coming request
-   * @param {res} res - The response object to be sent
-   * @return {sendErrorResponse|sendSuccessResponse}
-   */
 
   async createUser(req, res) {
     try {
@@ -82,11 +56,9 @@ module.exports = {
         email,
         passwordHash: hash(password),
       });
-      console.log("newUser>>>>>>>>>.", newUser);
       const userRole = await Role.getRole({
         name: role,
       });
-      console.log("userRole>>>>>>>>>>>", userRole);
 
       const allPermissions = await Permission.getPermissions();
       if (userRole.name == constants.ROLE_SUPER_ADMIN) {
@@ -94,13 +66,7 @@ module.exports = {
           allPermissions
         );
 
-        console.log(
-          "assignPermissionsToRole>>>>>>>>>>>",
-          assignPermissionsToRole
-        );
-
         const assignedRole = await newUser.addRole(userRole);
-        console.log("assigned>?>>>>>>>>>>>>.", assignedRole);
       }
 
       if (userRole.name == constants.ROLE_ADMIN) {
@@ -110,14 +76,11 @@ module.exports = {
             permissionsToAssign.push(permission);
           }
         }
-        console.log("permissionsToAssign>>>>>>>>>>.", permissionsToAssign);
         const assignPermissionsToRole = await userRole.addPermissions(
           permissionsToAssign
         );
-        console.log("assignPermissionsToRole>>>>>..", assignPermissionsToRole);
 
         const assignedRole = await newUser.addRole(userRole);
-        console.log("assigned>?>>>>>>>>>>>>.", assignedRole);
       }
 
       if (userRole.name == constants.ROLE_USER) {
@@ -130,14 +93,11 @@ module.exports = {
             permissionsToAssign.push(permission);
           }
         }
-        console.log("permissionsToAssign>>>>>>>>>>.", permissionsToAssign);
         const assignPermissionsToRole = await userRole.addPermissions(
           permissionsToAssign
         );
-        console.log("assignPermissionsToRole>>>>>..", assignPermissionsToRole);
 
         const assignedRole = await newUser.addRole(userRole);
-        console.log("assigned>?>>>>>>>>>>>>.", assignedRole);
       }
       return sendSuccessResponse(
         res,
@@ -155,15 +115,6 @@ module.exports = {
       );
     }
   },
-
-  /**
-   * Description of the getUserById controller. This function lets you retreive the user with specified id.
-   * @function getUserById
-   * @param {req} req - The coming request
-   * @param {res} res - The response object to be sent
-   * @param {id} id - The id passed in the parameters
-   * @return {sendErrorResponse|sendSuccessResponse}
-   */
 
   async getUserById(req, res) {
     try {
@@ -186,15 +137,6 @@ module.exports = {
     }
   },
 
-  /**
-   * Description of the getUserByEmail controller. This function lets you retreive the user with specified email.
-   * @function users
-   * @param {req} req - The coming request
-   * @param {res} res - The response object to be sent
-   * @param {email} enail - The email passed in the parameters
-   * @return {sendErrorResponse|sendSuccessResponse}
-   */
-
   async getUserByEmail(req, res) {
     try {
       let db = await DBInitializer();
@@ -216,15 +158,6 @@ module.exports = {
     }
   },
 
-  
-  /**
-   * Description of the updateUser controller. This function lets you update the specified user.
-   * @function updateUser
-   * @param {req} req - The coming request
-   * @param {res} res - The response object to be sent
-   * @return {sendErrorResponse|sendSuccessResponse}
-   */
-  
   async updateUser(req, res) {
     try {
       let db = await DBInitializer();
@@ -279,14 +212,6 @@ module.exports = {
     }
   },
 
-  
-  /**
-   * Description of the deleteUser controller. This function lets you delete the specified user.
-   * @function delete
-   * @param {req} req - The coming request
-   * @param {res} res - The response object to be sent
-   * @return {sendErrorResponse|sendSuccessResponse}
-   */
   async deleteUser(req, res) {
     try {
       let db = await DBInitializer();

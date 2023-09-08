@@ -26,7 +26,7 @@ module.exports = {
         [Op.or]: [{ email }],
       };
       let user = await User.getUser(where);
-      if (user && user.length) {
+      if (user) {
         return sendErrorResponse(
           res,
           422,
@@ -105,7 +105,6 @@ module.exports = {
         },
       ];
       const user = await User.getUser({ email }, attributes, include);
-      console.log("user>>>>>>>>>>>>>", user);
       if (!user)
         return sendErrorResponse(
           res,
@@ -184,21 +183,21 @@ module.exports = {
       );
     }
     //generate code
-    var recoveryCode = await recoveryCodeGenerator();
+    var recovery_code = await recoveryCodeGenerator();
     //add recoveryCode to the user table
     const updatedRecoveryCode = await User.updateRecoverCode(
-      { recoveryCode },
+      { recovery_code },
       where
     );
     console.log("updatedRecoveryCode>>>>>>>>>>", updatedRecoveryCode);
     //send code in email to the user
-    const result = await emailSender(email, recoveryCode);
+    const result = await emailSender(email, recovery_code);
     if (result) {
       return sendSuccessResponse(
         res,
         200,
         {
-          recoveryCode,
+          recovery_code,
         },
         "Email has been sent successfully. Please verify ..."
       );
@@ -210,9 +209,9 @@ module.exports = {
   async recoverPassword(req, res) {
     let db = await DBInitializer();
     const User = new UserModel(db.models.User);
-    const { password, confirmPassword, recoveryCode } = req.body;
+    const { password, confirmPassword, recovery_code } = req.body;
 
-    if (!recoveryCode) {
+    if (!recovery_code) {
       return sendErrorResponse(
         res,
         400,
@@ -228,15 +227,15 @@ module.exports = {
       );
     }
 
-    const passwordHash = hash(password);
+    const password_hash = hash(password);
 
-    console.log(passwordHash);
+    console.log(password_hash);
 
     let where = {
-      recoveryCode,
+      recovery_code,
     };
 
-    const updatePassword = await User.updatePassword({ passwordHash }, where);
+    const updatePassword = await User.updatePassword({ password_hash }, where);
 
     if (updatePassword.length) {
       return sendSuccessResponse(

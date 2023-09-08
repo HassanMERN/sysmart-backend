@@ -8,4 +8,9 @@ module.exports = {
   PERMISSION_ADD_A_USER: "add-a-user",
   PERMISSION_UPDATE_A_USER: "update-a-user",
   PERMISSION_DELETE_A_USER: "delete-a-user",
+
+  PERMISSION_CREATE_A_STORE: "create-a-store",
+  PERMISSION_VIEW_A_STORE: "view-a-store",
+  PERMISSION_UPDATE_A_STORE: "update-a-store",
+  PERMISSION_DELETE_A_STORE: "delete-a-store",
 };
