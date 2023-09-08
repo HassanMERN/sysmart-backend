@@ -1,0 +1,41 @@
+module.exports = {
+  up: (queryInterface, Sequelize) => {
+    return queryInterface.createTable("role-permission", {
+      role_id: {
+        //this is the foreign key from model role in model contact
+        type: Sequelize.INTEGER,
+        references: {
+          model: "role",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+      },
+      permission_id: {
+        //this is the foreign key from model permission in model contact
+        type: Sequelize.INTEGER,
+        references: {
+          model: "permission",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+      },
+      created_at: {
+        type: "TIMESTAMP",
+        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
+        allowNull: false,
+      },
+      updated_at: {
+        type: "TIMESTAMP",
+        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
+        allowNull: false,
+      },
+    });
+  },
+
+  down: (queryInterface, Sequelize) => {
+    // remove table
+    return queryInterface.dropTable("role-permission");
+  },
+};
