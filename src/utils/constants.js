@@ -13,4 +13,9 @@ module.exports = {
   PERMISSION_VIEW_A_STORE: "view-a-store",
   PERMISSION_UPDATE_A_STORE: "update-a-store",
   PERMISSION_DELETE_A_STORE: "delete-a-store",
+
+  PERMISSION_CREATE_A_STORE_ITEM: "create-a-store-item",
+  PERMISSION_VIEW_A_STORE_ITEM: "view-a-store-item",
+  PERMISSION_UPDATE_A_STORE_ITEM: "update-a-store-item",
+  PERMISSION_DELETE_A_STORE_ITEM: "delete-a-store-item",
 };

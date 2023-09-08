@@ -20,6 +20,10 @@ module.exports = function (sequelize, Model, DataTypes) {
       as: "user",
       foreignKey: "userId",
     });
+    Store.hasMany(models.StoreItem, {
+      as: "store-items",
+      foreignKey: "storeId",
+    });
   };
 
   return Store;
