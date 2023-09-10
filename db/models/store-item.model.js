@@ -18,11 +18,11 @@ module.exports = function (sequelize, Model, DataTypes) {
         type: DataTypes.FLOAT,
       },
     },
-    { sequelize, modelName: "StoreItems", tableName: "store-items" }
+    { sequelize, modelName: "StoreItems", tableName: "store-item" }
   );
 
   StoreItems.associate = (models) => {
-    Store.belongsTo(models.Store, {
+    StoreItems.belongsTo(models.Store, {
       as: "store",
       foreignKey: "storeId",
     });

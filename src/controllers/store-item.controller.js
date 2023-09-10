@@ -11,7 +11,7 @@ module.exports = {
   async getStoreItemById(req, res) {
     try {
       let db = await DBInitializer();
-      const StoreItem = new StoreItemModel(db.models.StoreItem);
+      const StoreItem = new StoreItemModel(db.models.StoreItems);
       let storeItem = await StoreItem.getStoreById(req.params.id);
       if (!storeItem) {
         return sendErrorResponse(
@@ -40,10 +40,18 @@ module.exports = {
   async createStoreItem(req, res) {
     try {
       let db = await DBInitializer();
-      const StoreItem = new StoreItemModel(db.models.StoreItem);
-
+      const StoreItem = new StoreItemModel(db.models.StoreItems);
+      const Store = new StoreModel(db.models.Store);
       const { title, quantity, unit_cost } = req.body;
-      let where = { title };
+      const userId = req.user.user_id;
+      let where = { user_id: userId };
+      const store = await Store.getStore(where);
+      const storeId = store.id;
+      if (!storeId) {
+        return sendErrorResponse(res, 422, "Store does not exist");
+      }
+      where = { title: title };
+
       let storeItem = await StoreItem.getStoreItem(where);
       if (storeItem) {
         return sendErrorResponse(
@@ -52,15 +60,17 @@ module.exports = {
           "this store item title already exist"
         );
       }
-      let newStoreItem = await Store.createStoreItem({
+      let newStoreItem = await StoreItem.createStoreItem({
         title,
-        userId: req.user.user_id, //start workin here
+        quantity,
+        unit_cost,
+        store_id: storeId,
       });
       return sendSuccessResponse(
         res,
         201,
-        newStore.dataValues,
-        "Store created successfully"
+        newStoreItem.dataValues,
+        "Store Item created successfully"
       );
     } catch (e) {
       console.error(e);
@@ -73,25 +83,24 @@ module.exports = {
     }
   },
 
-  async getUserStores(req, res) {
+  async getStoreItems(req, res) {
     try {
       let db = await DBInitializer();
-      const User = new UserModel(db.models.User);
+      const StoreItem = new StoreItemModel(db.models.StoreItems);
+      const storeId = req.params;
       const include = [
         {
           model: db.models.Store,
-          as: "stores",
+          as: "store",
         },
       ];
-      const allStoresOfUser = await User.getSingleUser(
-        { id: req.user.user_id },
-        include
-      );
+      const where = { storeId };
+      const allItemsOfStore = await StoreItem.getStoreItems(where, include);
       return sendSuccessResponse(
         res,
         201,
-        allStoresOfUser,
-        "Store list of a user"
+        allItemsOfStore,
+        "Item list of a store"
       );
     } catch (e) {
       console.error(e);
@@ -104,28 +113,37 @@ module.exports = {
     }
   },
 
-  async updateStorebyId(req, res) {
+  async updateStoreItembyId(req, res) {
     try {
       let db = await DBInitializer();
-      const Store = new StoreModel(db.models.Store);
-      const { title } = req.body;
+      const StoreItem = new StoreItemModel(db.models.StoreItems);
+      const { title, quantity, unit_cost } = req.body;
       const { id } = req.params;
       let where = {
         id,
       };
-      let store = await Store.getStore(where);
-      if (!store) {
-        return sendErrorResponse(res, 422, "Requested Store Does Not Exist");
+      let storeItem = await StoreItem.getStoreItem(where);
+      if (!storeItem) {
+        return sendErrorResponse(
+          res,
+          422,
+          "Requested Store Item Does Not Exist"
+        );
       }
       const toBeUpdated = {
         title,
+        quantity,
+        unit_cost,
       };
-      const updatedStore = await Store.updateStore(toBeUpdated, where);
+      const updatedStoreItem = await StoreItem.updateStoreItem(
+        toBeUpdated,
+        where
+      );
       return sendSuccessResponse(
         res,
         201,
-        updatedStore[1],
-        "Store Updated Successfully!"
+        updatedStoreItem[1],
+        "Store Item Updated Successfully!"
       );
     } catch (e) {
       console.error(e);
@@ -138,20 +156,20 @@ module.exports = {
     }
   },
 
-  async deleteStore(req, res) {
+  async deleteStoreItem(req, res) {
     try {
       let db = await DBInitializer();
-      const Store = new StoreModel(db.models.Store);
-      const existedStore = await Store.getStoreById(req.params.id);
-      if (!existedStore) {
-        return sendErrorResponse(res, 422, "Store does not exist");
+      const StoreItem = new StoreItemModel(db.models.StoreItems);
+      const existedStoreItem = await StoreItem.getStoreItemById(req.params.id);
+      if (!existedStoreItem) {
+        return sendErrorResponse(res, 422, "StoreItem does not exist");
       }
-      const deletedStore = await existedStore.destroy();
+      const deletedStoreItem = await existedStoreItem.destroy();
       return sendSuccessResponse(
         res,
         201,
-        deletedStore,
-        `Store with ID: ${existedStore.id} Deleted Successfully`
+        deletedStoreItem,
+        `StoreItem with ID: ${existedStoreItem.id} Deleted Successfully`
       );
     } catch (e) {
       console.error(e);

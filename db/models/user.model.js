@@ -27,8 +27,8 @@ module.exports = function (sequelize, Model, DataTypes) {
       as: "roles",
       foreignKey: "userId",
     });
-    User.hasMany(models.Store, {
-      as: "stores",
+    User.hasOne(models.Store, {
+      as: "store",
       foreignKey: "userId",
     });
   };

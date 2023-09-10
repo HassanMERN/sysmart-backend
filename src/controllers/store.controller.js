@@ -33,14 +33,20 @@ module.exports = {
       const Store = new StoreModel(db.models.Store);
 
       const { title } = req.body;
-      let where = { title };
+      const userId = req.user.user_id;
+      let where = { userId };
       let store = await Store.getStore(where);
+      if (store) {
+        return sendErrorResponse(res, 422, "User already has a store");
+      }
+      where = { title };
+      store = await Store.getStore(where);
       if (store) {
         return sendErrorResponse(res, 422, "this store title already exist");
       }
       let newStore = await Store.createStore({
         title,
-        userId: req.user.user_id,
+        userId,
       });
       return sendSuccessResponse(
         res,

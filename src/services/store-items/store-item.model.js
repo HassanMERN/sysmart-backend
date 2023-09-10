@@ -12,6 +12,25 @@ module.exports = class StoreItemModel {
     return storeItem;
   }
 
+  async getStoreItems(
+    where = null,
+    attributes = null,
+    limit = null,
+    offset = null,
+    include = null,
+    order = null
+  ) {
+    return this.model.findAll({
+      where,
+      attributes,
+      limit,
+      offset,
+      include,
+      order,
+      distinct: true,
+    });
+  }
+
   async createStoreItem(storeItem) {
     const newStoreItem = await this.model.create(storeItem);
     return newStoreItem;
@@ -19,13 +38,6 @@ module.exports = class StoreItemModel {
 
   async updateStoreItem(update, where) {
     return this.model.update(update, { where, returning: true });
-  }
-
-  async getSingleStoreItem(where, include) {
-    return this.model.findOne({
-      where,
-      include,
-    });
   }
 
   async deleteStoreItem(where) {

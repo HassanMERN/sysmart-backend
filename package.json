@@ -12,6 +12,7 @@
     "jsdoc": "^4.0.2",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^6.9.5",
+    "nodemon": "^3.0.1",
     "passport-google-oauth2": "^0.2.0",
     "pg": "^8.11.3",
     "pg-hstore": "^2.3.4",
