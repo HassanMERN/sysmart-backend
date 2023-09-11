@@ -49,38 +49,40 @@ module.exports = {
   async createPurchaseOrder(req, res) {
     try {
       let db = await DBInitializer();
-      const PurchaseOrder = new PurchaseOrderModel(db.models.PurchaseOrders);
+      const PurchaseOrder = new PurchaseOrderModel(db.models.PurchaseOrder);
       const PurchaseOrderLineItem = new PurchaseOrderLineItemModel(
-        db.models.PurchaseOrderLineItems
+        db.models.PurchaseOrderLineItem
       );
-      const StoreItem = new StoreItemModel(db.models.StoreItem);
-      const { title, quantity, unit_cost } = req.body;
+      const StoreItem = new StoreItemModel(db.models.StoreItems);
       const userId = req.user.user_id;
       let totalCostofPO = 0;
       console.log(req.body);
 
       for (const lineItem of req.body.lineItems) {
-        let storeItem = await StoreItem.getStoreItemById(lineItem.id);
+        let id = lineItem.id;
+        let storeItem = await StoreItem.getStoreItemById(id);
         if (!storeItem) {
           return sendErrorResponse(res, 422, "Wrong Store Item Specified");
-        } else if (storeItem.quantity < lineItem.quantity) {
+        } else if (storeItem.dataValues.quantity < lineItem.quantity) {
           return sendErrorResponse(
             res,
             422,
-            `Not enough stock available for store item: ${storeItem.title} \n max available: ${storeItem.quantity}`
+            `Not enough stock available for store item: ${storeItem.dataValues.title} \n max available: ${storeItem.dataValues.quantity}`
           );
         } else {
-          lineItem.totalCost = lineItem.quantity * storeItem.unit_cost;
-          lineItem.itemId = storeItem.id;
+          lineItem.totalCost =
+            lineItem.quantity * storeItem.dataValues.unit_cost;
+          lineItem.itemId = storeItem.dataValues.id;
           totalCostofPO += lineItem.totalCost;
         }
       }
+      const total_cost = totalCostofPO,
+        buyerId = userId;
 
       let newPurchaseOrder = await PurchaseOrder.createPurchaseOrder({
-        total_cost: totalCostofPO,
-        buyer_id: req.user.id,
+        total_cost,
+        buyer_id: buyerId,
       });
-      console.log("PO CREATED>>>>>>>>>>>>", newPurchaseOrder);
 
       const poId = newPurchaseOrder.dataValues.id;
       for (const lineItem in req.body.lineItems) {
@@ -91,7 +93,6 @@ module.exports = {
             quantity: lineItem.quantity,
             item_id: lineItem.itemId,
           });
-        console.log("LINE ITEM CREATED>>>>>>>>", newPurchaseOrderLineItem);
 
         newPurchaseOrder.purchaseOrderLineItems.push(newPurchaseOrderLineItem);
       }

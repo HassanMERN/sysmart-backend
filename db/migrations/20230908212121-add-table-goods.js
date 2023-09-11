@@ -23,6 +23,7 @@ module.exports = {
       store_id: {
         //this is the foreign key from model store in model store-items
         type: Sequelize.INTEGER,
+        allowNull: false,
         references: {
           model: "store",
           key: "id",

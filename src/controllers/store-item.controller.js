@@ -6,6 +6,7 @@ const DBInitializer = require("../../db/connection");
 const StoreItemModel = require("../services/store-items/store-item.model");
 const StoreModel = require("../services/store/store.model");
 const UserModel = require("../services/users/users.model");
+const { Op } = require("sequelize");
 
 module.exports = {
   async getStoreItemById(req, res) {
@@ -50,7 +51,8 @@ module.exports = {
       if (!storeId) {
         return sendErrorResponse(res, 422, "Store does not exist");
       }
-      where = { title: title };
+      console.log(storeId);
+      where = { [Op.and]: [{ title: title }, { store_id: storeId }] };
 
       let storeItem = await StoreItem.getStoreItem(where);
       if (storeItem) {
@@ -60,11 +62,12 @@ module.exports = {
           "this store item title already exist"
         );
       }
+
       let newStoreItem = await StoreItem.createStoreItem({
         title,
         quantity,
         unit_cost,
-        store_id: storeId,
+        storeId,
       });
       return sendSuccessResponse(
         res,
@@ -87,15 +90,11 @@ module.exports = {
     try {
       let db = await DBInitializer();
       const StoreItem = new StoreItemModel(db.models.StoreItems);
-      const storeId = req.params;
-      const include = [
-        {
-          model: db.models.Store,
-          as: "store",
-        },
-      ];
-      const where = { storeId };
-      const allItemsOfStore = await StoreItem.getStoreItems(where, include);
+      const { id } = req.params;
+     
+
+      const where = { store_id: id };
+      const allItemsOfStore = await StoreItem.getStoreItems(where);
       return sendSuccessResponse(
         res,
         201,
