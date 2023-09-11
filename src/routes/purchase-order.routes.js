@@ -3,7 +3,7 @@ const Auth = require("../middlewares/Auth");
 const PurchaseOrderController = require("../controllers/purchase-order.controller");
 const router = express.Router();
 
-router.get("/:id", Auth, PurchaseOrderController.getPurchaseOrderById);
+router.get("/find/:id", Auth, PurchaseOrderController.getPurchaseOrderById);
 
 router.get(
   "/user-purchase-orders/:id",
@@ -14,7 +14,7 @@ router.get(
 router.get(
   "/my-purchase-orders/",
   Auth,
-  PurchaseOrderController.getPurchaseOrders
+  PurchaseOrderController.getMyPurchaseOrders
 );
 
 router.post(

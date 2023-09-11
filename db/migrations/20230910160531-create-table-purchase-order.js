@@ -12,7 +12,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.FLOAT,
       },
-      buyer_id: {
+      user_id: {
         //this is the foreign key from model user in model purchase-orders
         type: Sequelize.INTEGER,
         references: {

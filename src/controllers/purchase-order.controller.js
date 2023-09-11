@@ -12,16 +12,8 @@ module.exports = {
     try {
       let db = await DBInitializer();
       const PurchaseOrder = new PurchaseOrderModel(db.models.PurchaseOrder);
-      const include = [
-        {
-          model: db.models.PurchaseOrderLineItem,
-          as: "purchase-order-line-item",
-        },
-      ];
-      let purchaseOrder = await PurchaseOrder.getPurchaseOrderById(
-        req.params.id,
-        include
-      );
+      const { id } = req.params;
+      let purchaseOrder = await PurchaseOrder.getPurchaseOrderById(id);
       if (!purchaseOrder) {
         return sendErrorResponse(
           res,
@@ -67,13 +59,25 @@ module.exports = {
           return sendErrorResponse(
             res,
             422,
-            `Not enough stock available for store item: ${storeItem.dataValues.title} \n max available: ${storeItem.dataValues.quantity}`
+            `Not enough stock available for store item: ${storeItem.dataValues.title}. Max available: ${storeItem.dataValues.quantity}`
           );
         } else {
           lineItem.totalCost =
-            lineItem.quantity * storeItem.dataValues.unit_cost;
+            lineItem.quantity * storeItem.dataValues.unit_cost; //this property I'm defining here
           lineItem.itemId = storeItem.dataValues.id;
           totalCostofPO += lineItem.totalCost;
+          const storeItemRemainingQuantity =
+            storeItem.dataValues.quantity - lineItem.quantity;
+
+          let where = {
+            id,
+          };
+
+          const toBeUpdated = {
+            quantity: storeItemRemainingQuantity,
+          };
+
+          await StoreItem.updateStoreItem(toBeUpdated, where);
         }
       }
       const total_cost = totalCostofPO,
@@ -81,12 +85,13 @@ module.exports = {
 
       let newPurchaseOrder = await PurchaseOrder.createPurchaseOrder({
         total_cost,
-        buyer_id: buyerId,
+        user_id: buyerId,
       });
 
-      const poId = newPurchaseOrder.dataValues.id;
-      for (const lineItem in req.body.lineItems) {
-        let newPurchaseOrderLineItem =
+      const poId = newPurchaseOrder.id;
+      const createdPurchaseOrderLineItems = [];
+      for (const lineItem of req.body.lineItems) {
+        const createdLineItem =
           await PurchaseOrderLineItem.createPurchaseOrderLineitem({
             line_item_cost: lineItem.totalCost,
             po_id: poId,
@@ -94,9 +99,11 @@ module.exports = {
             item_id: lineItem.itemId,
           });
 
-        newPurchaseOrder.purchaseOrderLineItems.push(newPurchaseOrderLineItem);
+        createdPurchaseOrderLineItems.push(createdLineItem);
       }
+      newPurchaseOrder.purchaseOrderLineItems = createdPurchaseOrderLineItems;
       console.log("FINAL PO>>>>>>>>>>", newPurchaseOrder);
+
       return sendSuccessResponse(
         res,
         201,
@@ -114,22 +121,14 @@ module.exports = {
     }
   },
 
-  async getPurchaseOrders(req, res) {
+  async getMyPurchaseOrders(req, res) {
+    console.log("HERE");
     try {
       let db = await DBInitializer();
       const PurchaseOrder = new PurchaseOrderModel(db.models.PurchaseOrder);
       const userId = req.user.user_id;
-      const include = [
-        {
-          model: db.models.PurchaseOrderLineItem,
-          as: "purchase-order-line-item",
-        },
-      ];
-      const where = { buyer_id: userId };
-      const allPurchaseOrders = await PurchaseOrder.getPurchaseOrders(
-        where,
-        include
-      );
+
+      const allPurchaseOrders = await PurchaseOrder.getPurchaseOrders(userId);
       return sendSuccessResponse(
         res,
         201,
@@ -151,18 +150,9 @@ module.exports = {
     try {
       let db = await DBInitializer();
       const PurchaseOrder = new PurchaseOrderModel(db.models.PurchaseOrder);
-      const userId = req.params;
-      const include = [
-        {
-          model: db.models.PurchaseOrderLineItem,
-          as: "purchase-order-line-item",
-        },
-      ];
-      const where = { buyer_id: userId };
-      const allPurchaseOrders = await PurchaseOrder.getPurchaseOrders(
-        where,
-        include
-      );
+      const { id } = req.params;
+
+      const allPurchaseOrders = await PurchaseOrder.getPurchaseOrders(id);
       return sendSuccessResponse(
         res,
         201,

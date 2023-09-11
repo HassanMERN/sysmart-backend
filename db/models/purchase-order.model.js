@@ -25,9 +25,9 @@ module.exports = function (sequelize, Model, DataTypes) {
       foreignKey: "userId",
     });
     PurchaseOrder.belongsToMany(models.PurchaseOrderLineItem, {
-      through: "PurchaseorderLineItem",
+      through: "PurchaseOrderLineItem",
       as: "purchase-order-line-item",
-      foreignKey: "purchaseOrderId",
+      foreignKey: "poId",
     });
   };
 

@@ -1,3 +1,5 @@
+const pool = require("../../../db/db.pool");
+
 module.exports = class PurchaseOrderLineitemModel {
   constructor(model) {
     this.model = model;
@@ -36,9 +38,28 @@ module.exports = class PurchaseOrderLineitemModel {
   }
 
   async createPurchaseOrderLineitem(purchaseOrderLineitem) {
-    const newPurchaseOrderLineitem = await this.model.create(
-      purchaseOrderLineitem
-    );
-    return newPurchaseOrderLineitem;
+    console.log("Model: ", this.model);
+    console.log("PO Line Item: ", purchaseOrderLineitem);
+    const { line_item_cost, quantity, po_id, item_id } = purchaseOrderLineitem;
+    const created_at = new Date(),
+      updated_at = new Date();
+
+    const query = {
+      text: 'INSERT INTO "purchase-order-line-item" ("line_item_cost", "quantity", "po_id", "item_id" ,"created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id", "line_item_cost", "quantity", "item_id", "po_id",  "created_at", "updated_at"',
+      values: [
+        line_item_cost,
+        quantity,
+        po_id,
+        item_id,
+        created_at,
+        updated_at,
+      ],
+    };
+
+    const result = await pool.query(query);
+    console.log(result.rows[0]);
+
+    const newPurchaseOrderLineItem = result.rows[0];
+    return newPurchaseOrderLineItem;
   }
 };
