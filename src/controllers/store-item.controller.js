@@ -12,7 +12,7 @@ module.exports = {
     try {
       let db = await DBInitializer();
       const StoreItem = new StoreItemModel(db.models.StoreItems);
-      let storeItem = await StoreItem.getStoreById(req.params.id);
+      let storeItem = await StoreItem.getStoreItemById(req.params.id);
       if (!storeItem) {
         return sendErrorResponse(
           res,

@@ -26,6 +26,9 @@ module.exports = function (sequelize, Model, DataTypes) {
       as: "store",
       foreignKey: "storeId",
     });
+    StoreItems.hasMany(models.PurchaseOrderLineItem, {
+      foreignKey: "storeItemId",
+    });
   };
 
   return StoreItems;
