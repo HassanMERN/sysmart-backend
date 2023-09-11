@@ -38,8 +38,6 @@ module.exports = class PurchaseOrderLineitemModel {
   }
 
   async createPurchaseOrderLineitem(purchaseOrderLineitem) {
-    console.log("Model: ", this.model);
-    console.log("PO Line Item: ", purchaseOrderLineitem);
     const { line_item_cost, quantity, po_id, item_id } = purchaseOrderLineitem;
     const created_at = new Date(),
       updated_at = new Date();
@@ -57,7 +55,6 @@ module.exports = class PurchaseOrderLineitemModel {
     };
 
     const result = await pool.query(query);
-    console.log(result.rows[0]);
 
     const newPurchaseOrderLineItem = result.rows[0];
     return newPurchaseOrderLineItem;

@@ -48,7 +48,6 @@ module.exports = {
       const StoreItem = new StoreItemModel(db.models.StoreItems);
       const userId = req.user.user_id;
       let totalCostofPO = 0;
-      console.log(req.body);
 
       for (const lineItem of req.body.lineItems) {
         let id = lineItem.id;
@@ -102,7 +101,6 @@ module.exports = {
         createdPurchaseOrderLineItems.push(createdLineItem);
       }
       newPurchaseOrder.purchaseOrderLineItems = createdPurchaseOrderLineItems;
-      console.log("FINAL PO>>>>>>>>>>", newPurchaseOrder);
 
       return sendSuccessResponse(
         res,
@@ -122,7 +120,6 @@ module.exports = {
   },
 
   async getMyPurchaseOrders(req, res) {
-    console.log("HERE");
     try {
       let db = await DBInitializer();
       const PurchaseOrder = new PurchaseOrderModel(db.models.PurchaseOrder);

@@ -189,7 +189,6 @@ module.exports = {
       { recovery_code },
       where
     );
-    console.log("updatedRecoveryCode>>>>>>>>>>", updatedRecoveryCode);
     //send code in email to the user
     const result = await emailSender(email, recovery_code);
     if (result) {
@@ -228,8 +227,6 @@ module.exports = {
     }
 
     const password_hash = hash(password);
-
-    console.log(password_hash);
 
     let where = {
       recovery_code,
