@@ -6,7 +6,7 @@ const Constants = require("../utils/constants");
 const router = express.Router();
 
 router.get(
-  "/:id",
+  "/find/:id",
   Auth,
   can(Constants.PERMISSION_VIEW_A_STORE),
   StoreController.getStoreById

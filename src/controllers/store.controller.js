@@ -68,17 +68,11 @@ module.exports = {
   async getUserStores(req, res) {
     try {
       let db = await DBInitializer();
-      const User = new UserModel(db.models.User);
-      const include = [
-        {
-          model: db.models.Store,
-          as: "stores",
-        },
-      ];
-      const allStoresOfUser = await User.getSingleUser(
-        { id: req.user.user_id },
-        include
-      );
+      const Store = new StoreModel(db.models.Store);
+      const user_id = req.user.user_id;
+      console.log("ID:   ", user_id);
+      const where = { user_id };
+      const allStoresOfUser = await Store.getStore(where);
       return sendSuccessResponse(
         res,
         201,
