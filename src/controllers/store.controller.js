@@ -27,6 +27,26 @@ module.exports = {
     }
   },
 
+  async getStores(req, res) {
+    try {
+      let db = await DBInitializer();
+      const Store = new StoreModel(db.models.Store);
+      let stores = await Store.getStores();
+      if (!stores) {
+        return sendErrorResponse(res, 422, "Requested Store Does Not Exist");
+      }
+      return sendSuccessResponse(res, 201, stores, "Store list");
+    } catch (e) {
+      console.error(e);
+      return sendErrorResponse(
+        res,
+        500,
+        "Could not perform operation at this time, kindly try again later.",
+        e
+      );
+    }
+  },
+
   async createStore(req, res) {
     try {
       let db = await DBInitializer();
@@ -70,7 +90,7 @@ module.exports = {
       let db = await DBInitializer();
       const Store = new StoreModel(db.models.Store);
       const user_id = req.user.user_id;
-      console.log("ID:   ", user_id);
+      console.log("ID: ", user_id);
       const where = { user_id };
       const allStoresOfUser = await Store.getStore(where);
       return sendSuccessResponse(

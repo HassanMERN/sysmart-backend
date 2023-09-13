@@ -48,37 +48,35 @@ module.exports = {
       const StoreItem = new StoreItemModel(db.models.StoreItems);
       const userId = req.user.user_id;
       let totalCostofPO = 0;
+      const lineItem = req.body;
+      let id = lineItem.id;
+      let storeItem = await StoreItem.getStoreItemById(id);
+      if (!storeItem) {
+        return sendErrorResponse(res, 422, "Wrong Store Item Specified");
+      } else if (storeItem.dataValues.quantity < lineItem.quantity) {
+        return sendErrorResponse(
+          res,
+          422,
+          `Not enough stock available for store item: ${storeItem.dataValues.title}. Max available: ${storeItem.dataValues.quantity}`
+        );
+      } else {
+        lineItem.totalCost = lineItem.quantity * storeItem.dataValues.unit_cost; //this property I'm defining here
+        lineItem.itemId = storeItem.dataValues.id;
+        totalCostofPO += lineItem.totalCost;
+        const storeItemRemainingQuantity =
+          storeItem.dataValues.quantity - lineItem.quantity;
 
-      for (const lineItem of req.body.lineItems) {
-        let id = lineItem.id;
-        let storeItem = await StoreItem.getStoreItemById(id);
-        if (!storeItem) {
-          return sendErrorResponse(res, 422, "Wrong Store Item Specified");
-        } else if (storeItem.dataValues.quantity < lineItem.quantity) {
-          return sendErrorResponse(
-            res,
-            422,
-            `Not enough stock available for store item: ${storeItem.dataValues.title}. Max available: ${storeItem.dataValues.quantity}`
-          );
-        } else {
-          lineItem.totalCost =
-            lineItem.quantity * storeItem.dataValues.unit_cost; //this property I'm defining here
-          lineItem.itemId = storeItem.dataValues.id;
-          totalCostofPO += lineItem.totalCost;
-          const storeItemRemainingQuantity =
-            storeItem.dataValues.quantity - lineItem.quantity;
+        let where = {
+          id,
+        };
 
-          let where = {
-            id,
-          };
+        const toBeUpdated = {
+          quantity: storeItemRemainingQuantity,
+        };
 
-          const toBeUpdated = {
-            quantity: storeItemRemainingQuantity,
-          };
-
-          await StoreItem.updateStoreItem(toBeUpdated, where);
-        }
+        await StoreItem.updateStoreItem(toBeUpdated, where);
       }
+
       const total_cost = totalCostofPO,
         buyerId = userId;
 
@@ -88,19 +86,19 @@ module.exports = {
       });
 
       const poId = newPurchaseOrder.id;
-      const createdPurchaseOrderLineItems = [];
-      for (const lineItem of req.body.lineItems) {
-        const createdLineItem =
-          await PurchaseOrderLineItem.createPurchaseOrderLineitem({
-            line_item_cost: lineItem.totalCost,
-            po_id: poId,
-            quantity: lineItem.quantity,
-            item_id: lineItem.itemId,
-          });
+      const createdPurchaseOrderLineItem = [];
 
-        createdPurchaseOrderLineItems.push(createdLineItem);
-      }
-      newPurchaseOrder.purchaseOrderLineItems = createdPurchaseOrderLineItems;
+      const createdLineItem =
+        await PurchaseOrderLineItem.createPurchaseOrderLineitem({
+          line_item_cost: lineItem.totalCost,
+          po_id: poId,
+          quantity: lineItem.quantity,
+          item_id: lineItem.itemId,
+        });
+
+      createdPurchaseOrderLineItem.push(createdLineItem);
+
+      newPurchaseOrder.purchaseOrderLineItem = createdPurchaseOrderLineItem;
 
       return sendSuccessResponse(
         res,

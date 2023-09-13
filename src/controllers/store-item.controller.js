@@ -91,9 +91,37 @@ module.exports = {
       let db = await DBInitializer();
       const StoreItem = new StoreItemModel(db.models.StoreItems);
       const { id } = req.params;
-     
+      console.log("Id: ", id);
 
       const where = { store_id: id };
+      const allItemsOfStore = await StoreItem.getStoreItems(where);
+      return sendSuccessResponse(
+        res,
+        201,
+        allItemsOfStore,
+        "Item list of a store"
+      );
+    } catch (e) {
+      console.error(e);
+      return sendErrorResponse(
+        res,
+        500,
+        "Could not perform operation at this time, kindly try again later.",
+        e
+      );
+    }
+  },
+
+  async getMyStoreItems(req, res) {
+    try {
+      let db = await DBInitializer();
+      const StoreItem = new StoreItemModel(db.models.StoreItems);
+      const Store = new StoreModel(db.models.Store);
+      const userId = req.user.user_id;
+      let where = { userId };
+      const StoreOfUser = await Store.getStore(where);
+      console.log(StoreOfUser);
+      where = { store_id: StoreOfUser.dataValues.id };
       const allItemsOfStore = await StoreItem.getStoreItems(where);
       return sendSuccessResponse(
         res,

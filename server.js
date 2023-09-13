@@ -3,6 +3,8 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 const cors = require("cors");
+const http = require("http");
+const socketIo = require("socket.io");
 
 //my imports
 const db_initializer = require("./db/connection");
@@ -28,23 +30,41 @@ db_initializer();
 
 routes(app);
 
-// const whitelist = ["http://localhost:3000", "*"];
-// const corsOptions = {
-//   origin: function (origin, callback) {
-//     if (!origin || whitelist.indexOf(origin) !== -1) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error("Not allowed by CORS"));
-//     }
-//   },
-//   credentials: true,
-// };
-// app.options("*", cors(corsOptions));
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+
+const server = http.createServer(app);
+const io = socketIo(server);
+
+// Initialize an empty object to store connected clients.
+const connectedClients = {};
+
+io.on("connection", (socket) => {
+  // Handle new socket connections here.
+  console.log(`Socket connected: ${socket.id}`);
+
+  // Listen for a custom event when a user sends a message.
+  socket.on("message", ({ userId, message }) => {
+    // Broadcast the message to the recipient (store owner).
+    if (connectedClients[userId]) {
+      connectedClients[userId].emit("message", message);
+    }
+  });
+
+  // Handle disconnect event.
+  socket.on("disconnect", () => {
+    // Remove the socket from the connectedClients object.
+    for (const [key, value] of Object.entries(connectedClients)) {
+      if (value === socket) {
+        delete connectedClients[key];
+        break;
+      }
+    }
+    console.log(`Socket disconnected: ${socket.id}`);
+  });
+});
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

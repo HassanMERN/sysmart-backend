@@ -11,6 +11,14 @@ router.get(
   can(Constants.PERMISSION_VIEW_A_STORE),
   StoreController.getStoreById
 );
+
+router.get(
+  "/all-stores",
+  Auth,
+  can(Constants.PERMISSION_VIEW_A_STORE),
+  StoreController.getStores
+);
+
 router.get(
   "/get-user-stores",
   Auth,

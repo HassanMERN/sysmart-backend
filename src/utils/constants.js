@@ -18,4 +18,7 @@ module.exports = {
   PERMISSION_VIEW_A_STORE_ITEM: "view-a-store-item",
   PERMISSION_UPDATE_A_STORE_ITEM: "update-a-store-item",
   PERMISSION_DELETE_A_STORE_ITEM: "delete-a-store-item",
+
+  PERMISSION_CREATE_A_PURCHASE_ORDER: "create-a-purchase-order",
+  PERMISSION_VIEW_A_PURCHASE_ORDER: "view-a-purchase-order",
 };

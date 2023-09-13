@@ -44,47 +44,45 @@ module.exports = class PurchaseOrderModel {
 
     const result = await pool.query(query);
 
-    // Create a map to store purchase orders and their line items
-    const purchaseOrdersMap = new Map();
+    const purchaseOrders = [];
 
     for (const row of result.rows) {
       const poId = row.id;
 
-      // If the purchase order doesn't exist in the map, create it
-      if (!purchaseOrdersMap.has(poId)) {
-        purchaseOrdersMap.set(poId, {
-          purchaseOrder: {
-            id: row.id,
-            total_cost: row.total_cost,
-            user_id: row.user_id,
-            created_at: row.created_at,
-            updated_at: row.updated_at,
-            purchaseOrderLineItems: [], // Initialize an empty array for line items
-          },
-        });
+      // Find the purchase order in the array or create a new one
+      let purchaseOrder = purchaseOrders.find((po) => po.id === poId);
+
+      if (!purchaseOrder) {
+        purchaseOrder = {
+          id: row.id,
+          total_cost: row.total_cost,
+          user_id: row.user_id,
+          created_at: row.created_at,
+          updated_at: row.updated_at,
+          purchaseOrderLineItems: [],
+        };
+        purchaseOrders.push(purchaseOrder);
       }
 
-      // Create a line item object and add it to the purchase order's line items
+      // Create a line item object and add it to the purchase order
       const lineItem = {
         item_id: row.item_id,
         quantity: row.quantity,
         line_item_cost: row.line_item_cost,
       };
 
-      purchaseOrdersMap
-        .get(poId)
-        .purchaseOrder.purchaseOrderLineItems.push(lineItem);
+      purchaseOrder.purchaseOrderLineItems.push(lineItem);
     }
 
-    // Convert the map values (purchase orders) into an array
-    const purchaseOrders = Array.from(purchaseOrdersMap.values());
+    // Flatten the result to match the desired format
+    const finalResponse = purchaseOrders.map((po) => ({
+      id: po.id,
+      total_cost: po.total_cost,
+      quantity: po.purchaseOrderLineItems[0].quantity,
+      item_id: po.purchaseOrderLineItems[0].item_id,
+    }));
 
-    const finalResponse = {
-      status: "success",
-      data: purchaseOrders,
-    };
-
-    return finalResponse;
+    return { purchaseOrders: finalResponse };
   }
 
   async createPurchaseOrder(purchaseOrder) {

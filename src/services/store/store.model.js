@@ -12,6 +12,25 @@ module.exports = class StoreModel {
     return store;
   }
 
+  async getStores(
+    where = null,
+    attributes = null,
+    limit = null,
+    offset = null,
+    include = null,
+    order = null
+  ) {
+    return this.model.findAll({
+      where,
+      attributes,
+      limit,
+      offset,
+      include,
+      order,
+      distinct: true,
+    });
+  }
+
   async createStore(store) {
     const newStore = await this.model.create(store);
     return newStore;

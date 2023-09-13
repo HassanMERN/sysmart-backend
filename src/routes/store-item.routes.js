@@ -6,7 +6,7 @@ const Constants = require("../utils/constants");
 const router = express.Router();
 
 router.get(
-  "/:id",
+  "/find/:id",
   Auth,
   can(Constants.PERMISSION_VIEW_A_STORE_ITEM),
   StoreItemController.getStoreItemById
@@ -17,6 +17,13 @@ router.get(
   Auth,
   can(Constants.PERMISSION_VIEW_A_STORE_ITEM),
   StoreItemController.getStoreItems
+);
+
+router.get(
+  "/get-my-store-items",
+  Auth,
+  can(Constants.PERMISSION_VIEW_A_STORE_ITEM),
+  StoreItemController.getMyStoreItems
 );
 
 router.post(
