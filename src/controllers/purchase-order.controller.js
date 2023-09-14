@@ -4,9 +4,8 @@ const {
 } = require("../utils/sendResponse");
 const DBInitializer = require("../../db/connection");
 const StoreItemModel = require("../services/store-items/store-item.model");
+const StoreModel = require("../services/store/store.model");
 const PurchaseOrderModel = require("../services/purchase-order/purchase-order.model");
-const PurchaseOrderLineItemModel = require("../services/purchase-order-line-item/purchase-order-line-item.model");
-
 module.exports = {
   async getPurchaseOrderById(req, res) {
     try {
@@ -42,29 +41,24 @@ module.exports = {
     try {
       let db = await DBInitializer();
       const PurchaseOrder = new PurchaseOrderModel(db.models.PurchaseOrder);
-      const PurchaseOrderLineItem = new PurchaseOrderLineItemModel(
-        db.models.PurchaseOrderLineItem
-      );
       const StoreItem = new StoreItemModel(db.models.StoreItems);
       const userId = req.user.user_id;
-      let totalCostofPO = 0;
-      const lineItem = req.body;
-      let id = lineItem.id;
+      const { id, title, quantity, store_id } = req.body;
+
+      let totalCost;
       let storeItem = await StoreItem.getStoreItemById(id);
       if (!storeItem) {
         return sendErrorResponse(res, 422, "Wrong Store Item Specified");
-      } else if (storeItem.dataValues.quantity < lineItem.quantity) {
+      } else if (storeItem.dataValues.quantity < quantity) {
         return sendErrorResponse(
           res,
           422,
           `Not enough stock available for store item: ${storeItem.dataValues.title}. Max available: ${storeItem.dataValues.quantity}`
         );
       } else {
-        lineItem.totalCost = lineItem.quantity * storeItem.dataValues.unit_cost; //this property I'm defining here
-        lineItem.itemId = storeItem.dataValues.id;
-        totalCostofPO += lineItem.totalCost;
+        totalCost = quantity * storeItem.dataValues.unit_cost;
         const storeItemRemainingQuantity =
-          storeItem.dataValues.quantity - lineItem.quantity;
+          storeItem.dataValues.quantity - quantity;
 
         let where = {
           id,
@@ -77,28 +71,14 @@ module.exports = {
         await StoreItem.updateStoreItem(toBeUpdated, where);
       }
 
-      const total_cost = totalCostofPO,
-        buyerId = userId;
-
       let newPurchaseOrder = await PurchaseOrder.createPurchaseOrder({
-        total_cost,
-        user_id: buyerId,
+        id,
+        title,
+        quantity,
+        total_cost: totalCost,
+        user_id: userId,
+        store_id,
       });
-
-      const poId = newPurchaseOrder.id;
-      const createdPurchaseOrderLineItem = [];
-
-      const createdLineItem =
-        await PurchaseOrderLineItem.createPurchaseOrderLineitem({
-          line_item_cost: lineItem.totalCost,
-          po_id: poId,
-          quantity: lineItem.quantity,
-          item_id: lineItem.itemId,
-        });
-
-      createdPurchaseOrderLineItem.push(createdLineItem);
-
-      newPurchaseOrder.purchaseOrderLineItem = createdPurchaseOrderLineItem;
 
       return sendSuccessResponse(
         res,
@@ -148,6 +128,34 @@ module.exports = {
       const { id } = req.params;
 
       const allPurchaseOrders = await PurchaseOrder.getPurchaseOrders(id);
+      return sendSuccessResponse(
+        res,
+        201,
+        allPurchaseOrders,
+        "All Purchase Orders of the user"
+      );
+    } catch (e) {
+      console.error(e);
+      return sendErrorResponse(
+        res,
+        500,
+        "Could not perform operation at this time, kindly try again later.",
+        e
+      );
+    }
+  },
+
+  async getUserSales(req, res) {
+    try {
+      let db = await DBInitializer();
+      const PurchaseOrder = new PurchaseOrderModel(db.models.PurchaseOrder);
+      const Store = new StoreModel(db.models.Store);
+      const userId = req.user.user_id;
+      const where = { user_id: userId };
+      const storeOfUser = await Store.getStore(where);
+
+      const store_id = storeOfUser.dataValues.id;
+      const allPurchaseOrders = await PurchaseOrder.getPurchaseOrders(store_id);
       return sendSuccessResponse(
         res,
         201,

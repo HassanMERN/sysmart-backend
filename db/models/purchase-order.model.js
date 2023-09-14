@@ -8,8 +8,21 @@ module.exports = function (sequelize, Model, DataTypes) {
         autoIncrement: true,
         allowNull: false,
       },
+      item_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
+
+      item_name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
       total_cost: {
         type: DataTypes.FLOAT,
+      },
+      store_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
       },
     },
     {
@@ -23,11 +36,6 @@ module.exports = function (sequelize, Model, DataTypes) {
     PurchaseOrder.belongsTo(models.User, {
       as: "user",
       foreignKey: "userId",
-    });
-    PurchaseOrder.belongsToMany(models.PurchaseOrderLineItem, {
-      through: "PurchaseOrderLineItem",
-      as: "purchase-order-line-item",
-      foreignKey: "poId",
     });
   };
 

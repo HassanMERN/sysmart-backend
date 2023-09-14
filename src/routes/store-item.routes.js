@@ -18,12 +18,24 @@ router.get(
   can(Constants.PERMISSION_VIEW_A_STORE_ITEM),
   StoreItemController.getStoreItems
 );
-
+router.get(
+  "/get-all-store-items",
+  Auth,
+  can(Constants.PERMISSION_VIEW_A_STORE_ITEM),
+  StoreItemController.getAllStoreItems
+);
 router.get(
   "/get-my-store-items",
   Auth,
   can(Constants.PERMISSION_VIEW_A_STORE_ITEM),
   StoreItemController.getMyStoreItems
+);
+
+router.get(
+  "/search",
+  Auth,
+  can(Constants.PERMISSION_VIEW_A_STORE_ITEM),
+  StoreItemController.searchItems
 );
 
 router.post(

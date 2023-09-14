@@ -21,6 +21,13 @@ router.get(
   PurchaseOrderController.getMyPurchaseOrders
 );
 
+router.get(
+  "/my-store-purchase-orders/",
+  Auth,
+  can(constants.PERMISSION_VIEW_A_PURCHASE_ORDER),
+  PurchaseOrderController.getUserSales
+);
+
 router.post(
   "/create-purchase-order",
   Auth,

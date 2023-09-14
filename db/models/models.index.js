@@ -6,7 +6,6 @@ const RolePermissionsInitiater = require("./role-permissions.model");
 const StoreInitiater = require("./store.model");
 const StoreItemInitiater = require("./store-item.model");
 const PurchaseOrderInitiater = require("./purchase-order.model");
-const PurchaseOrderLineItemInitiater = require("./purchase-order-line-item.model");
 
 module.exports = async function (sequelize, Model, DataTypes) {
   return {
@@ -18,10 +17,5 @@ module.exports = async function (sequelize, Model, DataTypes) {
     Store: StoreInitiater(sequelize, Model, DataTypes),
     StoreItem: StoreItemInitiater(sequelize, Model, DataTypes),
     PurchaseOrder: PurchaseOrderInitiater(sequelize, Model, DataTypes),
-    PurchaseOrderLineItem: PurchaseOrderLineItemInitiater(
-      sequelize,
-      Model,
-      DataTypes
-    ),
   };
 };

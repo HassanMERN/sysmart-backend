@@ -112,6 +112,29 @@ module.exports = {
     }
   },
 
+  async getAllStoreItems(req, res) {
+    try {
+      let db = await DBInitializer();
+      const StoreItem = new StoreItemModel(db.models.StoreItems);
+
+      const allItemsOfStore = await StoreItem.getStoreItems();
+      return sendSuccessResponse(
+        res,
+        201,
+        allItemsOfStore,
+        "Item list of a store"
+      );
+    } catch (e) {
+      console.error(e);
+      return sendErrorResponse(
+        res,
+        500,
+        "Could not perform operation at this time, kindly try again later.",
+        e
+      );
+    }
+  },
+
   async getMyStoreItems(req, res) {
     try {
       let db = await DBInitializer();
@@ -197,6 +220,30 @@ module.exports = {
         201,
         deletedStoreItem,
         `StoreItem with ID: ${existedStoreItem.id} Deleted Successfully`
+      );
+    } catch (e) {
+      console.error(e);
+      return sendErrorResponse(
+        res,
+        500,
+        "Could not perform operation at this time, kindly try again later.",
+        e
+      );
+    }
+  },
+
+  async searchItems(req, res) {
+    const { searchString } = req.query;
+    try {
+      let db = await DBInitializer();
+      const StoreItem = new StoreItemModel(db.models.StoreItems);
+
+      const relevantItems = await StoreItem.searchStoreItems(searchString);
+      return sendSuccessResponse(
+        res,
+        201,
+        relevantItems,
+        "Item list of a store"
       );
     } catch (e) {
       console.error(e);

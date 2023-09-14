@@ -90,7 +90,6 @@ module.exports = {
       let db = await DBInitializer();
       const Store = new StoreModel(db.models.Store);
       const user_id = req.user.user_id;
-      console.log("ID: ", user_id);
       const where = { user_id };
       const allStoresOfUser = await Store.getStore(where);
       return sendSuccessResponse(

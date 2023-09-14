@@ -1,3 +1,5 @@
+const pool = require("../../../db/db.pool");
+
 module.exports = class StoreItemModel {
   constructor(model) {
     this.model = model;
@@ -42,5 +44,17 @@ module.exports = class StoreItemModel {
 
   async deleteStoreItem(where) {
     return this.model.destroy({ where });
+  }
+
+  async searchStoreItems(searchString) {
+    const query = {
+      text: 'SELECT * FROM "store-item" WHERE "title" ILIKE $1',
+      values: [`%${searchString}%`],
+    };
+
+    const result = await pool.query(query);
+    const storeItems = result.rows;
+
+    return storeItems;
   }
 };

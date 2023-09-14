@@ -160,40 +160,29 @@ module.exports = {
 
   async updateUser(req, res) {
     try {
+      console.log(req.body);
       let db = await DBInitializer();
       const User = new UserModel(db.models.User);
-      const {
-        email,
-        passwordHash,
-        firstName,
-        lastName,
-        username,
-        phone,
-        isActive,
-        settings,
-      } = req.body;
+      const { passwordHash, first_name, last_name, email } = req.body;
       let where = {
-        [Op.or]: [{ email }, { phone }],
+        [Op.or]: [{ email }],
       };
       let user = await User.getUser(where);
       if (!user) {
         return sendErrorResponse(
           res,
           422,
-          "User with that email or phone does not exist"
+          "User with that email does not exist"
         );
       }
       const toBeUpdated = {
-        firstName,
-        lastName,
-        username,
-        phone,
-        passwordHash: hash(passwordHash),
-        settings,
-        isActive,
+        first_name,
+        last_name,
+        passwordHash,
+        email,
       };
       const updatedUser = await User.updateUser(toBeUpdated, {
-        [Op.or]: [{ email }, { phone }],
+        [Op.or]: [{ email }],
       });
       return sendSuccessResponse(
         res,

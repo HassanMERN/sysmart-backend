@@ -31,6 +31,7 @@ module.exports = function (sequelize, Model, DataTypes) {
       as: "store",
       foreignKey: "userId",
     });
+
     User.hasMany(models.PurchaseOrder, {
       as: "purchase-orders",
       foreignKey: "purchaseOrderId",
